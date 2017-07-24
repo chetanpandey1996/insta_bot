@@ -149,19 +149,6 @@ def get_post_id(insta_username,code):
                     minimum_likes = user_media['data'][i]['likes']['count']
                     minimum_likes_id = user_media['data'][i]['id']
                 i += 1
-        if code ==1:
-          tag = raw_input("tag name for which you want to search : ")
-          global comment
-          comment = raw_input("comment you want to post")
-          while len(user_media['data']) > i and i <10:
-             if user_media['data'][i]['caption'] != None:
-                if user_media['data'][i]['caption']['text'].find(tag)!= -1:
-                  print user_media['data'][i]['caption']['text']
-                  post_a_comment(user_media['data'][i]['id'],1)
-                  j=1
-             i+=1
-          if j==0:
-              print "tag not found"
         elif code ==0:
           if len(user_media['data']):
             return user_media['data'][0]['id']
@@ -212,7 +199,22 @@ def post_a_comment(insta_username,code):
   else:
     print "Unable to add comment. Try again!"
 
-
+def target_comment():
+    tag = raw_input("tag you want to search for")
+    request_url = (BASE_URL + 'tags/%s/media/recent?access_token=%s') % (tag, ACCESS_TOKEN)
+    print 'GET request url : %s' % (request_url)
+    user_media = requests.get(request_url).json()
+    if len(user_media['data'])>0:
+        global comment
+        comment =raw_input("comment you want to put")
+        i=0
+        while len(user_media['data'])>i:
+            post_a_comment(user_media['data'][i]['id'],1)
+            i=i+1
+        start_bot()
+    else:
+        print 'Tag not found!'
+        start_bot()
 '''
 Function declaration to get the list of user's who liked your post
 '''
@@ -296,8 +298,7 @@ def own_action(user_name):
         print "e.Get a list of comments on your recent post"
         print "f.Make a comment on your recent post of"
         print "g.Delete negative comments from your recent post"
-        print "h.For targeted comment on your post"
-        print "i.Go to main menu"
+        print "h.Go to main menu"
 
         choice = raw_input("Enter you choice: ")
         if choice == "a":
@@ -334,8 +335,6 @@ def own_action(user_name):
         elif choice == "g":
             delete_negative_comment(user_name)
         elif choice == "h":
-            get_post_id(user_name, 1)
-        elif choice == "i":
             start_bot()
         else:
             print "wrong choice"
@@ -358,8 +357,7 @@ def action_on_other(user_name):
         print "e.Get a list of comments on %s's recent post" % user_name
         print "f.Make a comment on %s's recent post of" % user_name
         print "g.Delete negative comments from %s's recent post" % user_name
-        print "h.For targeted comment on %s's post" % user_name
-        print "i.Go to main menu"
+        print "h.Go to main menu"
 
         choice = raw_input("Enter you choice: ")
         if choice == "a":
@@ -396,8 +394,6 @@ def action_on_other(user_name):
         elif choice == "g":
             delete_negative_comment(user_name)
         elif choice == "h":
-           get_post_id(user_name,1)
-        elif choice == "i":
             start_bot()
         else:
             print "wrong choice"
@@ -412,7 +408,8 @@ def start_bot():
         print 'Here are your menu options:'
         print "a.Perform actions on own\n"
         print "b.Perform actions on other user\n"
-        print "c.Exit"
+        print "c.Perform target commenting\n"
+        print "d.Exit"
 
         choice = raw_input("Enter you choice: ")
         if choice == "a":
@@ -422,6 +419,8 @@ def start_bot():
             user_name = raw_input("Enter the user name of the user : ")
             action_on_other(user_name)
         elif choice == "c":
+            target_comment()
+        elif choice == "d":
             exit()
         else:
             print "wrong choice"
